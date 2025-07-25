@@ -27,7 +27,11 @@ SECRET_KEY = os.environ.get('VTU_SITE_SECRET')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1' ,'f641-197-211-63-67.ngrok-free.app']
+ALLOWED_HOSTS = ['127.0.0.1',
+                 '1a448260eb58.ngrok-free.app',
+                 '192.168.173.57',
+                 'localhost',
+                 '192.168.0.100']
 
 
 # Application definition
@@ -40,12 +44,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    #my_apps
+    # my_apps
     'user',
     'transactions',
     'services',
+    'cards',
 
-    #third party apps
+    # third party apps
     'rest_framework',
     'corsheaders',
     'rest_framework_simplejwt',
@@ -119,12 +124,27 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://127.0.0.1:8000",
     "http://127.0.0.1:5173",
-    "http://127.0.0.1:5173",
+    "http://192.168.173.57:5173",
+]
+
+CORS_ALLOWED_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
     'http://127.0.0.1:5173',
 ]
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
@@ -160,11 +180,11 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication'
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 3
+    'PAGE_SIZE': 20
 }
 
 JWT_AUTH = {
-    'JWT_RESPONSE_PAYLOAD_HANDLER':'vtu_site.utilities.my_jwt_response_handler'
+    'JWT_RESPONSE_PAYLOAD_HANDLER': 'vtu_site.utilities.my_jwt_response_handler'
 }
 
 SIMPLE_JWT = {
@@ -175,7 +195,7 @@ SIMPLE_JWT = {
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,
     'VERIFYING_KEY': None,
-    'AUTH_HEADER_TYPES': ('Bearer','JWT'),
+    'AUTH_HEADER_TYPES': ('Bearer', 'JWT'),
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),

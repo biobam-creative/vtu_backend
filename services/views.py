@@ -12,6 +12,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .models import *
 from .serializers import *
 
+
 class MobileDataPlanListView(ListAPIView):
     serializer_class = MobileDataPlanSerializer
 
@@ -19,7 +20,6 @@ class MobileDataPlanListView(ListAPIView):
     filter_backends = [DjangoFilterBackend]
 
     def get_queryset(self):
-        
         return MobileDataPlan.objects.all()
 
 
@@ -32,9 +32,10 @@ class ElectricityProviderListView(ListAPIView):
     def get_queryset(self):
         return ElectricityPayment.objects.all()
 
+
 class CableTVPlanListView(ListAPIView):
     serializer_class = CableTVPlanSerializer
-    
+
     filterset_fields = ['cable_tv_provider']
     filter_backends = [DjangoFilterBackend]
 

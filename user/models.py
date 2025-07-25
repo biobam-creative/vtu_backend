@@ -8,7 +8,7 @@ class UserAccountManager(BaseUserManager):
         if not email:
             raise ValueError('User must have an email')
 
-        #email = self.normalize_email(email)
+        # email = self.normalize_email(email)
         user = self.model(email=email, name=name)
 
         user.set_password(password)
@@ -31,8 +31,10 @@ class UserAccount(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-    wallet = models.PositiveIntegerField(default=0, blank=True, null=True)
+    wallet = models.FloatField(default=0, blank=True, null=True)
     verified = models.BooleanField(blank=True, null=True)
+    transaction_pin = models.CharField(
+        blank=True, null=True, default=None, max_length=255)
 
     objects = UserAccountManager()
     USERNAME_FIELD = 'email'
@@ -46,11 +48,3 @@ class UserAccount(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
-
-
-# class Wallet(models.Model):
-#     owner = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
-#     balance = models.PositiveIntegerField(default=0)
-
-#     def __str__(self):
-#         return f'{self.owner} wallet'

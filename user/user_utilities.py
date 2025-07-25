@@ -16,7 +16,6 @@ import os
 
 
 def send_confirmation_email(user,  message, subject, mail_type):
-    print(user)
     if user:
 
         uidb64 = urlsafe_base64_encode(str(user.id).encode('utf-8'))
@@ -24,7 +23,6 @@ def send_confirmation_email(user,  message, subject, mail_type):
         # current_site = get_current_site(request=request).domain
         # relative_link = reverse('password_reset_confirm',kwargs={'uidb64':uidb64,'token':reset_password_token})
         absurl = f'http://127.0.0.1:5173/token-check/{uidb64}/{token}/{mail_type}'
-        print(absurl)
         # absurl = 'http://'+current_site + relative_link
         email_body = f'{message} \n' + absurl
 
@@ -66,10 +64,6 @@ def token_check(uidb64, token):
     try:
         id=smart_str(urlsafe_base64_decode(uidb64))
         user=UserAccount.objects.get(id=id)
-        # print(user, id)
-        # print(token)
-
-        print(PasswordResetTokenGenerator().check_token(user, token))
 
         if not PasswordResetTokenGenerator().check_token(user, token):
             return False

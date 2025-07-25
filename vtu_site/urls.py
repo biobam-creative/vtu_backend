@@ -21,12 +21,18 @@ from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.views.decorators.csrf import csrf_exempt
 
+admin.site.site_header = "Vtu Buddy Admin"
+admin.site.index_title = "Vtu Buddy Admin"
+admin.site.site_title = "Vtu Buddy Admin"
+
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
-    path('api/token/', csrf_exempt(TokenObtainPairView.as_view()), name='token_obtain_pair'),
+    path('api/token/', csrf_exempt(TokenObtainPairView.as_view()),
+         name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/user/', include('user.urls')),
     path('api/transactions/', include('transactions.urls')),
+    path('api/cards/', include('cards.urls')),
     path('api/services/', include('services.urls')),
     path('admin/', admin.site.urls),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

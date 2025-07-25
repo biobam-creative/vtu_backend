@@ -11,8 +11,6 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import *
 
 
-
-
 User = get_user_model()
 
 # class UserSerializer(serializers.ModelSerializer):
@@ -21,12 +19,12 @@ User = get_user_model()
 #         model = User
 #         fields = ('email')
 
+
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserAccount
-        fields = ('id','last_login','is_superuser', 'email', 'name', 'is_staff', 'is_active', 'groups', 'user_permissions', 'wallet')
-
+        fields = ('__all__')
 
 
 class UserSerializerWithToken(serializers.ModelSerializer):
@@ -55,8 +53,6 @@ class UserSerializerWithToken(serializers.ModelSerializer):
         fields = ('token', 'email', 'paassword')
 
 
-
-
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
@@ -65,7 +61,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         user = UserSerializer(UserAccount.objects.get(email=self.user))
 
         # data.update({'wallet':wallet.data})
-        data.update({'user':user.data})
+        data.update({'user': user.data})
         return data
 
 
@@ -73,37 +69,40 @@ class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField()
 
+
 class ResetPasswordEmailRequestSerializer(serializers.Serializer):
-    email=serializers.EmailField()
+    email = serializers.EmailField()
 
     class Meta:
         fields = ('email')
-    
+
+
 class SetNewPasswordSerializer(serializers.Serializer):
-    password=serializers.CharField(min_length=6,max_length=100,write_only=True)
-    token=serializers.CharField(min_length=1,write_only=True)
-    uidb64=serializers.CharField(min_length=1,write_only=True)
+    password = serializers.CharField(
+        min_length=6, max_length=100, write_only=True)
+    token = serializers.CharField(min_length=1, write_only=True)
+    uidb64 = serializers.CharField(min_length=1, write_only=True)
 
     class Meta:
-        fields = ('password','token','uidb64')
+        fields = ('password', 'token', 'uidb64')
 
     def validate(self, attrs):
         print(attrs)
         password = attrs.get('password')
         token = attrs.get('token')
         uidb64 = attrs.get('uidb64')
-        print(password,token,uidb64)
-       
+        print(password, token, uidb64)
+
         id = int(force_str(urlsafe_base64_decode(uidb64)))
         user = User.objects.get(id=id)
         print(id, user)
 
-        print(PasswordResetTokenGenerator().check_token( user=user, token=token))
+        print(PasswordResetTokenGenerator().check_token(user=user, token=token))
 
-        if not PasswordResetTokenGenerator().check_token( user, token):
+        if not PasswordResetTokenGenerator().check_token(user, token):
             print('token')
             raise AuthenticationFailed('The reset link is invalid', 401)
-            
+
         user.set_password(password)
         user.save()
 

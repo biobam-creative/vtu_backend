@@ -29,7 +29,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1',
                  '1a448260eb58.ngrok-free.app',
-                 '192.168.173.57',
+                 '192.168.65.57',
                  'localhost',
                  '192.168.0.100']
 
@@ -37,6 +37,15 @@ ALLOWED_HOSTS = ['127.0.0.1',
 # Application definition
 
 INSTALLED_APPS = [
+    # third party apps
+    'daphne',
+    'rest_framework',
+    'corsheaders',
+    'rest_framework_simplejwt',
+    'django_filters',
+    'channels',
+
+    # default apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -49,13 +58,21 @@ INSTALLED_APPS = [
     'transactions',
     'services',
     'cards',
+    'notifications',
 
-    # third party apps
-    'rest_framework',
-    'corsheaders',
-    'rest_framework_simplejwt',
-    'django_filters',
+
 ]
+
+ASGI_APPLICATION = 'vtu_site.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
+# For production, use Redis:
+# 'BACKEND': 'channels_redis.core.RedisChannelLayer',
+# 'CONFIG': {'hosts': [('127.0.0.1', 6379)]},
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -120,11 +137,11 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
+    "http://localhost:5173",
     "http://127.0.0.1:3000",
     "http://127.0.0.1:8000",
     "http://127.0.0.1:5173",
-    "http://192.168.173.57:5173",
+    "http://192.168.65.57:5173",
 ]
 
 CORS_ALLOWED_HEADERS = [
@@ -140,7 +157,7 @@ CORS_ALLOWED_HEADERS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:3000',
+    'http://localhost:5173',
     'http://127.0.0.1:3000',
     'http://127.0.0.1:5173',
 ]
@@ -180,7 +197,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication'
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 20
+    'PAGE_SIZE': 80
 }
 
 JWT_AUTH = {
@@ -188,7 +205,7 @@ JWT_AUTH = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=14),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': False,
@@ -216,5 +233,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # EMAIL_HOST = 'smtp.gmail.com'
 # EMAIL_USE_TLS = True
 # EMAIL_PORT = 587
+# EMAIL_HOST_USER = 'emmanueltesting2712@gmail.com'
+# EMAIL_HOST_PASSWORD = 'parmfxmrfelttmhm'
 # EMAIL_HOST_USER = 'emmanueltesting2712@gmail.com'
 # EMAIL_HOST_PASSWORD = 'parmfxmrfelttmhm'

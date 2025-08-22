@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Transactions, PersonalAccount
+from .models import Ads, Transactions, PersonalAccount
 
 
 class TransactionsSerializer(serializers.ModelSerializer):
@@ -13,6 +13,13 @@ class PersonalAccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PersonalAccount
+        fields = ('__all__')
+
+
+class AdsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Ads
         fields = ('__all__')
 
 

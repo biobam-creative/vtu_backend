@@ -29,6 +29,42 @@ def monnify_encode_base64(api_key, secret_key):
 monnify_base_url = "https://sandbox.monnify.com"
 
 
+class EpinAPI:
+    def __init__(self, api_key):
+        self.api_key = api_key
+        self.base_url = 'https://api.epins.com.ng/sandbox'
+        self.headers = {
+            'Authorization': f"Bearer {api_key}",
+            'Content-Type': 'application/json'
+        }
+
+    def recharge_printing(self, end_point, denomination, quantity, name="", network="mtn"):
+        now = datetime.now()
+        ref = now.strftime("%Y%m%d%H%M%S")
+
+        payload = {
+            "ref": ref,
+            "network": network,
+            "pinDenomination": denomination,
+            "pinQuantity": quantity,
+        }
+
+        print(payload)
+
+        response = requests.post(
+            f'{self.base_url}/{end_point}', headers=self.headers, data=payload)
+        data = json.loads(response.text)
+        print(data)
+        description = data.get('description', {})
+
+        if description.get('response_description') == 'Transaction Successful':
+            pins = description.get('PIN', [])
+            return {
+                "status": "success",
+                "pins": pins,
+                "message": "Pins retrieved successfully"}
+
+
 class VTPassAPI:
     def __init__(self, api_key, public_key, secret_key):
         self.api_key = api_key
@@ -41,9 +77,10 @@ class VTPassAPI:
             'public-key': self.public_key
         }
 
-    def buy_service(self, service_id, amount, phone, variation_code=None, biller_code=None, type=None):
+    def buy_service(self, service_id, amount, phone, variation_code=None, biller_code=None, type=None, name=""):
+        print(service_id, amount, phone, variation_code, biller_code, name)
         now = datetime.now()
-        request_id = now.strftime("%Y%m%d%H%M%S" + "necta")
+        request_id = now.strftime("%Y%m%d%H%M%S" + "necta"+name)
 
         payload = {
             "request_id": request_id,

@@ -24,7 +24,7 @@ from rest_framework import permissions, status
 
 from .models import Transactions, PersonalAccount
 from .serializers import PersonalAccountSerializer, TransactionsSerializer
-from .transaction_utilites import monnify_encode_base64, monnify_base_url, compute_sha512, VTPassAPI
+from .transaction_utilites import EpinAPI, monnify_encode_base64, monnify_base_url, compute_sha512, VTPassAPI
 
 from user.models import UserAccount
 from user.serializers import UserSerializer
@@ -39,6 +39,8 @@ class SaveTransactionView(APIView):
         number = data['number']
         transaction_status = data['status']
         user = request.user
+
+        print(data)
 
         transaction = Transactions.objects.create(
             user=user, transaction_type=transaction_type, amount=amount, number=number, status=transaction_status)
@@ -64,7 +66,34 @@ class SaveTransactionView(APIView):
             if encrypted_pin != user.transaction_pin:
                 return Response(data={"message": "Incorrect transaction pin", "is_successful": False}, status=status.HTTP_400_BAD_REQUEST)
             if user.wallet >= amount:
+                print(transaction_type)
                 # make call to get service the customer wants
+                if str(transaction_type).startswith('Card printing'):
+                    print(os.environ.get('EPINS_TEST_KEY'))
+                    epins = EpinAPI(
+                        api_key=os.environ.get('EPINS_TEST_KEY')
+                    )
+
+                    epins_response = epins.recharge_printing(
+                        end_point='epin/',
+                        denomination=data.get('denomination', 1),
+                        quantity=data.get('quantity', 1),
+                        name=user.name,
+                        network=data.get('network', 'mtn')
+                    )
+                    # print(epins_response)
+                    print(epins_response)
+                    if epins_response.get('status') == 'success':
+                        return Response(epins_response, status=status.HTTP_200_OK)
+                    else:
+                        transaction.is_successful = False
+                        transaction.status = "failed"
+                        transaction.save()
+                        return Response(
+                            {"message": "Failed to retrieve pins"},
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+
                 vtpass_api = VTPassAPI(
                     api_key=os.environ.get('VTPASS_API_KEY'),
                     public_key=os.environ.get('VTPASS_PUBLIC_KEY'),
@@ -77,7 +106,8 @@ class SaveTransactionView(APIView):
                     phone=data['number'],
                     variation_code=data.get('variation_code'),
                     biller_code=data.get('biller_code'),
-                    type=data.get('type')
+                    type=data.get('type'),
+                    name=user.email
                 )
                 # print(vt_response)
 
@@ -130,7 +160,13 @@ class SaveTransactionView(APIView):
                         )
                 else:
                     # if call is not successful
-                    pass
+                    transaction.is_successful = False
+                    transaction.status = "failed"
+                    transaction.save()
+                    return Response(
+                        {"message": f"Transaction failed: {description}"},
+                        status=status.HTTP_403_FORBIDDEN
+                    )
 
             else:
                 transaction.is_successful = False

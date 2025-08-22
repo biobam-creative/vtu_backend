@@ -23,8 +23,8 @@ from rest_framework import permissions, status
 from .user_utilities import token_check, send_confirmation_email
 from .serializers import *
 from .models import *
-from transactions.models import Transactions, PersonalAccount
-from transactions.serializers import TransactionsSerializer, PersonalAccountSerializer, MonthlyTransactionSerializer
+from transactions.models import Ads, Transactions, PersonalAccount
+from transactions.serializers import AdsSerializer, TransactionsSerializer, PersonalAccountSerializer, MonthlyTransactionSerializer
 from transactions.transaction_utilites import compute_sha512
 User = get_user_model()
 
@@ -130,14 +130,17 @@ class Dashboard(APIView):
                 "month": month,
                 "items": queryset
             })
+        ads = Ads.objects.filter(active=True)
 
         user_setaializer = UserSerializer(user).data
         transaction_serializer = MonthlyTransactionSerializer(
             result, many=True).data
+        ads_serializer = AdsSerializer(ads, many=True).data
 
         data = {
             'user': user_setaializer,
             'transactions': transaction_serializer,
+            'ads': ads_serializer
         }
         return Response(data, status=status.HTTP_200_OK)
 
@@ -172,6 +175,8 @@ class VerificationMailCheck(APIView):
         if check:
             if mail_type == 'password_reset':
                 return Response({'success': True, 'message': 'Email Checked', 'uidb64': uidb64, 'token': token, 'mail_type': mail_type}, status=status.HTTP_200_OK)
+            elif mail_type == "pin-change":
+                return Response({'success': True, 'message': 'Email Checked', 'uidb64': uidb64, 'token': token, 'mail_type': mail_type}, status=status.HTTP_200_OK)
             elif mail_type == "user_verification":
                 user.verified = True
                 user.save()
@@ -185,10 +190,12 @@ class RequestPassordChangeEmail(APIView):
 
     def post(self, request):
         email = request.data['email']
+        change = request.data.get('change', None)
+        print(change)
         try:
             user = User.objects.get(email=email)
             send_confirmation_email(user, message='Click to Verify your email',
-                                    subject='Password Reset', mail_type='password_reset')
+                                    subject='Password Reset', mail_type=change)
             return Response({'success': 'An email to reset your password has been sent'}, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)

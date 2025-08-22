@@ -11,6 +11,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import *
 from .serializers import *
+from .vtpass_data import data_variations
 
 
 class MobileDataPlanListView(ListAPIView):
@@ -41,3 +42,32 @@ class CableTVPlanListView(ListAPIView):
 
     def get_queryset(self):
         return CableTVPlan.objects.all()
+
+
+class UploadDataVariations(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    def get(self, request):
+        for variation in data_variations:
+            name = variation.get("name")
+            variation_code = variation.get("variation_code")
+            variation_amount = variation.get("variation_amount")
+
+            network = variation.get("network")
+            data_cap = variation.get("data_cap")
+            validity = variation.get("validity")
+            price = int(variation_amount.split(".")[0])
+
+            data = {
+                "network": network,
+                "price": price,
+                "data_cap": data_cap,
+                "validity": validity,
+                "vt_pass_variation_code": variation_code,
+                "name": name
+            }
+            serializer = MobileDataPlanSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                print(name)
+        return Response({"message": "Success"}, status=200)
